@@ -1,0 +1,10 @@
+streamlit
+openai
+pandas
+groq
+matplotlib
+langchain
+langchain.tools
+langchain-community
+langchain-experimental
+langchain-openai
