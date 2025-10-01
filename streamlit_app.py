@@ -13,7 +13,7 @@ st.set_page_config(page_title="Agente CSV LLM", layout="wide")
 st.title("🤖 Agente de Análise Exploratória de Dados (LLM + CSV)")
 
 # 🔑 Pega a chave do secrets (configurada no Streamlit Cloud)
-api_key =  st.secrets["OPENAI_API_KEY"]
+api_key =  st.secrets["GROQ_API_KEY"]
 if "GROQ_API_KEY" not in st.secrets:
     st.error("❌ Configure sua chave da OpenAI em st.secrets['GROQ_API_KEY']")
 else:
