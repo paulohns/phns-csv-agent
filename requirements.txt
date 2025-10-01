@@ -7,4 +7,4 @@ langchain
 langchain.tools
 langchain-community
 langchain-experimental
-langchain-openai
+langchain_grog
