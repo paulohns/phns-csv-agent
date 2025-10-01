@@ -7,4 +7,4 @@ langchain
 langchain.tools
 langchain-community
 langchain-experimental
-langchain_grog
+langchain-grog
