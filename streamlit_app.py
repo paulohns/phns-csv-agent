@@ -162,3 +162,10 @@ if uploaded_file and api_key:
 
                 with open(zip_path, "rb") as f:
                     st.download_button("📥 Baixar gráficos ZIP", f, file_name="graficos.zip")
+
+# Exibe todo o histórico
+st.subheader("Histórico de Perguntas e Respostas")
+for idx, item in enumerate(st.session_state.historico, 1):
+    st.markdown(f"**{idx}. Pergunta:** {item['pergunta']}")
+    st.markdown(f"➡️ **Resposta:** {item['resposta']}")
+    st.write("---")
