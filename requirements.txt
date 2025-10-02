@@ -8,3 +8,8 @@ langchain.tools
 langchain-community
 langchain-experimental
 langchain-groq
+langsmith>=0.1.0
+tabulate
+scikit-learn
+python-multipart
+python-dotenv
