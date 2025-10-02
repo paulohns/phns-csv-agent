@@ -12,6 +12,10 @@ st.set_page_config(page_title="Agente CSV LLM", layout="wide")
 
 st.title("🤖 Agente de Análise Exploratória de Dados (LLM + CSV)")
 
+# Inicializa o histórico na sessão
+if "historico" not in st.session_state:
+    st.session_state.historico = []
+
 # 🔑 Pega a chave do secrets (configurada no Streamlit Cloud)
 api_key =  st.secrets["GROQ_API_KEY"]
 if "GROQ_API_KEY" not in st.secrets:
@@ -132,6 +136,10 @@ if uploaded_file and api_key:
         with st.spinner("Pensando..."):
             try:
                 resposta = agent.run(pergunta)
+                
+                # Armazena no histórico
+                st.session_state.historico.append({"pergunta": pergunta, "resposta": resposta})
+    
                 st.success("Resposta do Agente:")
                 st.write(resposta)
             except Exception as e:
