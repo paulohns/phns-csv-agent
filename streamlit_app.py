@@ -1,10 +1,8 @@
 import streamlit as st
 import pandas as pd
 import os
-import tempfile
+import glob
 from langchain_experimental.agents import create_pandas_dataframe_agent
-from langchain_groq.chat_models import ChatGroq
-from langchain.memory import ConversationBufferMemory
 from zipfile import ZipFile
 import matplotlib.pyplot as plt
 from utils import Utils
@@ -30,55 +28,51 @@ utils = Utils()
 
 # 📂 Upload CSV
 uploaded_file = st.file_uploader("Carregue um arquivo CSV", type=["csv"])
-caminho = "files"
+PASTA_ARQUIVOS = "files"
+os.makedirs(PASTA_ARQUIVOS, exist_ok=True)
+
+# Função para limpar o campo
+def limpar_pergunta():
+    st.session_state.pergunta = ""
+
+
 if uploaded_file and api_key:
-    df = CSVAnalysisAgent.load_file(uploaded_file)
     df = pd.read_csv(uploaded_file)
+    CSVAnalysisAgent.load_file(df)
 
     st.write("### Pré-visualização dos dados")
     st.dataframe(df.head())
 
     # Pergunta do usuário
     pergunta = st.text_area("❓ Faça uma pergunta sobre os dados:")
+    # Inicializa o estado da sessão
+    if "pergunta" not in st.session_state:
+        st.session_state.pergunta = pergunta
 
     if st.button("Perguntar", disabled=not pergunta):
+        utils.limpar_pasta_graficos(PASTA_ARQUIVOS)
+        utils.limpar_pasta_graficos(".")
         with st.spinner("Pensando..."):
             try:
                 resposta = CSVAnalysisAgent.agent.run(pergunta)
                 
                 # Armazena no histórico
                 st.session_state.historico.append({"pergunta": pergunta, "resposta": resposta})
-    
-                st.success("Resposta do Agente:")
+                st.success("Resposta do Agente")
                 st.write(resposta)
+                limpar_pergunta()
             except Exception as e:
                 st.error(f"Erro ao processar: {e}")
-    
-    # ⚡ Extra: gerar ZIP com histogramas
-    st.write("### Gerar histogramas de todas as colunas numéricas")
-    if st.button("Gerar ZIP de gráficos", disabled=utils.verificar_pasta_arquivos("files")):
-        num_cols = df.select_dtypes(include="number").columns.tolist()
-        if not num_cols:
-            st.warning("Nenhuma coluna numérica encontrada!")
-        else:
-            with tempfile.TemporaryDirectory() as tmpdir:
-                arquivos = []
-                for col in num_cols:
-                    fig, ax = plt.subplots()
-                    df[col].hist(bins=30, ax=ax)
-                    ax.set_title(f"Distribuição de {col}")
-                    caminho = os.path.join(tmpdir, f"{col}.png")
-                    fig.savefig(caminho)
-                    arquivos.append(caminho)
-                    plt.close(fig)
 
-                zip_path = os.path.join(tmpdir, "graficos.zip")
-                with ZipFile(zip_path, "w") as zipf:
-                    for f in arquivos:
-                        zipf.write(f, os.path.basename(f))
+    arquivos = glob.glob(os.path.join(PASTA_ARQUIVOS, "*.png"))
+    zip_path = os.path.join(PASTA_ARQUIVOS, "graficos.zip")
+    with ZipFile(zip_path, "w") as zipf:
+        if len(arquivos) > 0:
+            for f in arquivos:
+                zipf.write(f, os.path.basename(f))
 
-                with open(zip_path, "rb") as f:
-                    st.download_button("📥 Baixar gráficos ZIP", f, file_name="graficos.zip")
+    with open(zip_path, "rb") as f:
+        st.download_button("📥 Baixar gráficos ZIP", f, file_name="graficos.zip", disabled=utils.verificar_pasta_arquivos(PASTA_ARQUIVOS))
 
 # Exibe todo o histórico
 st.subheader("Histórico de Perguntas e Respostas")

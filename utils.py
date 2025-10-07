@@ -1,6 +1,7 @@
 
 import os
 import glob
+import zipfile
 
 
 class Utils:
@@ -16,7 +17,7 @@ class Utils:
         os.makedirs(pasta, exist_ok=True)
 
         # Buscar todos os PNG e ZIP
-        arquivos = glob.glob(os.path.join(pasta, "*.png")) + glob.glob(os.path.join(pasta, "*.zip"))
+        arquivos = glob.glob(os.path.join(pasta, "*.png")) + glob.glob(os.path.join(pasta, "*.zip")) + glob.glob(os.path.join(pasta, "*.csv")) + glob.glob(os.path.join(pasta, "*.jpeg")) + glob.glob(os.path.join(pasta, "*.jpg"))
         print("arquivos")
         print(arquivos)
         for arq in arquivos:
@@ -34,7 +35,11 @@ class Utils:
         """
         arquivos = glob.glob(os.path.join(pasta, "*.png")) + glob.glob(os.path.join(pasta, "*.zip"))
         if arquivos:
-            print(f"Arquivos encontrados em {pasta}: {arquivos}")
+            for arquivo in arquivos:
+                if arquivo.endswith(".zip"):
+                    with zipfile.ZipFile(arquivo, 'r') as zip_ref:
+                        if len(zip_ref.namelist()) == 0:
+                            return True
             return False
         else:
             print(f"Nenhum arquivo encontrado em {pasta}.")

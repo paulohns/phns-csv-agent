@@ -32,12 +32,13 @@ class CSVAnalysisAgent:
             return_messages=False
         )
 
-    def load_file(self, file_path: str):
+    def load_file(self, df: pd.DataFrame):
         try:
             prompt_inicial = """
                 Você é um assistente especializado em análise de dados CSV. 
                 Seu objetivo é permitir que o usuário faça perguntas sobre qualquer arquivo CSV carregado e fornecer análises detalhadas de EDA (Exploração de Dados)
                 em formato de texto caso a pergunta seja simples ou em graficos e a quantidade de gráficos deve ser de no máximo o numero de colunas do arquivo carregado.
+                IMPORTANTE: Evitar loops infinitos quando ja tiver a resposta textual e não precisar de gráficos inclusive retornar o resultado da pesquisa junto com o "Final Answer".
 
                 O que você deve fazer:
                 1. Descrição dos Dados:
@@ -72,11 +73,12 @@ class CSVAnalysisAgent:
                     - Retorne Thought junto com a resposta final
 
                     IMPORTANTE:
-                    - Nunca escreva "Final Answer" junto com "Action".
+                    - Nunca escreva "Final Answer" junto com "Action", retornar a pesquisa junto com o "Final Answer".
                     - Sempre gere código Python primeiro e use Action.
                     - Depois que o código for executado, use Final Answer apenas para retornar o caminho do(s) arquivo(s).
                     - Em caso de solicitação de gráficos na pergunta, CRIE SOMENTE O GRAFICO SOLICITADO e retorne somente o caminho ("files") do arquivo ou ZIP e nunca reimprima os gráficos caso
                     contrário NÃO gerar graficos retornar somente a resposta. 
+                    
                     Exemplo:
                     ```python
                     # código Python válido 
@@ -107,7 +109,7 @@ class CSVAnalysisAgent:
                                 zipf.write(f, os.path.basename(f))
                     ``` 
             """
-
+            self.df = df
             self.agent = create_pandas_dataframe_agent(
                 self.llm, 
                 self.df, 
@@ -120,7 +122,7 @@ class CSVAnalysisAgent:
                 },
                 allow_dangerous_code=True
             )
-            return self.df
+            return True
         except Exception as e:
             print("Erro ao carregar CSV:", e)
             return False
