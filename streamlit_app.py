@@ -10,7 +10,7 @@ from agent import CSVAnalysisAgent
 
 st.set_page_config(page_title="Agente CSV LLM", layout="wide")
 
-st.title("🤖 Agente de Análise Exploratória de Dados (LLM + CSV)")
+st.title("🤖 PHNS - Agent CSV com LangChain")
 
 # Inicializa o histórico na sessão
 if "historico" not in st.session_state:
